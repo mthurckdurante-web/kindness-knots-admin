@@ -5,35 +5,16 @@ import os
 # -------------------------------
 # Configuração da senha do admin
 # -------------------------------
-ADMIN_PASSWORD = "2828"  # Troque para a senha que quiser
+ADMIN_PASSWORD = "2828"  # Troque para a senha que desejar
 
 # -------------------------------
 # Inicializar estado da sessão
 # -------------------------------
-# Inicializar estado da sessão
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-# Login
-if not st.session_state.logged_in:
-    st.title("Login Admin - Kindness Knots")
-    senha_input = st.text_input("Digite a senha do admin", type="password")
-    if st.button("Entrar"):
-        if senha_input == ADMIN_PASSWORD:
-            st.session_state.logged_in = True
-            st.success("Login realizado com sucesso!")
-            # Não usar st.experimental_rerun()
-        else:
-            st.error("Senha incorreta. Tente novamente.")
-
-# Mostrar painel apenas se estiver logado
-if st.session_state.logged_in:
-    st.title("Painel Admin - Kindness Knots")
-    # ... resto do código do admin aqui ...
-
-
 # -------------------------------
-# Função para carregar produtos
+# Funções auxiliares
 # -------------------------------
 def carregar_produtos():
     try:
@@ -41,9 +22,6 @@ def carregar_produtos():
     except:
         return pd.DataFrame(columns=["nome", "categoria", "preco", "imagem"])
 
-# -------------------------------
-# Função para salvar produtos
-# -------------------------------
 def salvar_produtos(df):
     df.to_csv("produtos.csv", index=False)
 
@@ -53,12 +31,11 @@ def salvar_produtos(df):
 st.title("Login Admin - Kindness Knots")
 
 if not st.session_state.logged_in:
-    senha_input = st.text_input("Digite a senha do admin", type="password")
-    if st.button("Entrar"):
+    senha_input = st.text_input("Digite a senha do admin", type="password", key="login_senha")
+    if st.button("Entrar", key="login_btn"):
         if senha_input == ADMIN_PASSWORD:
             st.session_state.logged_in = True
             st.success("Login realizado com sucesso!")
-            st.experimental_rerun()
         else:
             st.error("Senha incorreta. Tente novamente.")
 
@@ -101,7 +78,7 @@ if st.session_state.logged_in:
             st.error("Preencha o nome e envie a imagem do produto.")
 
     # -------------------------------
-    # Editar ou remover produto
+    # Editar / Remover produto
     # -------------------------------
     st.header("Editar / Remover Produto")
     if len(produtos_df) == 0:
@@ -112,16 +89,16 @@ if st.session_state.logged_in:
         index = opcoes.index(produto_selecionado)
         produto = produtos_df.iloc[index]
 
-        nome_edit = st.text_input("Nome", value=produto["nome"], key="edit_nome")
-        categoria_edit = st.selectbox("Categoria", ["Chaveiros", "Broches", "Pelúcias", "Amigurumis"],
-                                      index=["Chaveiros", "Broches", "Pelúcias", "Amigurumis"].index(produto["categoria"]),
-                                      key="edit_categoria")
-        preco_edit = st.number_input("Preço (R$)", value=float(produto["preco"]), min_value=0.0, step=0.1, key="edit_preco")
-        imagem_edit = st.file_uploader("Alterar imagem (opcional)", type=["png", "jpg", "jpeg"], key="edit_imagem")
+        nome_edit = st.text_input("Nome", value=produto["nome"], key=f"edit_nome_{index}")
+        categoria_edit = st.selectbox("Categoria", ["Chaveiros","Broches","Pelúcias","Amigurumis"],
+                                      index=["Chaveiros","Broches","Pelúcias","Amigurumis"].index(produto["categoria"]),
+                                      key=f"edit_categoria_{index}")
+        preco_edit = st.number_input("Preço (R$)", value=float(produto["preco"]), min_value=0.0, step=0.1, key=f"edit_preco_{index}")
+        imagem_edit = st.file_uploader("Alterar imagem (opcional)", type=["png","jpg","jpeg"], key=f"edit_imagem_{index}")
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("Salvar Alterações", key="btn_save"):
+            if st.button("Salvar Alterações", key=f"btn_save_{index}"):
                 produtos_df.at[index, "nome"] = nome_edit
                 produtos_df.at[index, "categoria"] = categoria_edit
                 produtos_df.at[index, "preco"] = preco_edit
@@ -134,7 +111,7 @@ if st.session_state.logged_in:
                 st.success("Produto atualizado com sucesso!")
 
         with col2:
-            if st.button("Remover Produto", key="btn_remove"):
+            if st.button("Remover Produto", key=f"btn_remove_{index}"):
                 produtos_df = produtos_df.drop(index)
                 salvar_produtos(produtos_df)
                 st.success("Produto removido com sucesso!")
@@ -145,5 +122,3 @@ if st.session_state.logged_in:
     if st.button("Sair", key="btn_logout"):
         st.session_state.logged_in = False
         st.experimental_rerun()
-
-
