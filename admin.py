@@ -5,7 +5,7 @@ import os
 # -------------------------------
 # Configuração da senha do admin
 # -------------------------------
-ADMIN_PASSWORD = "sua_senha_secreta"  # Troque para a senha que desejar
+ADMIN_PASSWORD = "2828"  # Troque para a senha que desejar
 
 # -------------------------------
 # Inicializar estado da sessão
@@ -123,3 +123,4 @@ if st.session_state.logged_in:
     if st.button("Sair", key="btn_logout"):
         st.session_state.logged_in = False
         st.success("Você saiu do admin!")
+
