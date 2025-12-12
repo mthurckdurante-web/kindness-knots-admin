@@ -1,22 +1,13 @@
 import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, db, storage
+import requests
+import json
 
 # -------------------------------
-# Configuração Firebase
+# Configurações
 # -------------------------------
-cred = credentials.Certificate("firebase_credentials.json")  # coloque este JSON na mesma pasta
-firebase_admin.initialize_app(cred, {
-    "databaseURL": "https://kindnessknots-c6b86-default-rtdb.firebaseio.com/",
-    "storageBucket": "kindnessknots-c6b86.appspot.com"
-})
+FIREBASE_URL = "https://kindnessknots-c6b86-default-rtdb.firebaseio.com/produtos.json"  # Realtime Database
+ADMIN_PASSWORD = "sua_senha_secreta"  # Troque para sua senha
 
-bucket = storage.bucket()
-
-# -------------------------------
-# Login Admin
-# -------------------------------
-ADMIN_PASSWORD = "2828"  # Troque para sua senha
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -40,30 +31,24 @@ if st.session_state.logged_in:
     nome = st.text_input("Nome do Produto")
     categoria = st.selectbox("Categoria", ["Chaveiros", "Broches", "Pelúcias", "Amigurumis"])
     preco = st.number_input("Preço (R$)", min_value=0.0, step=0.1)
-    imagem = st.file_uploader("Imagem do produto", type=["png","jpg","jpeg"])
+    url_imagem = st.text_input("URL da imagem")  # Agora precisa fornecer URL pública da imagem
 
     if st.button("Adicionar Produto"):
-        if nome and imagem:
-            # Salvar imagem no Firebase Storage
-            blob = bucket.blob(imagem.name)
-            blob.upload_from_file(imagem)
-            blob.make_public()
-            url_imagem = blob.public_url
-
-            # Salvar produto no Realtime Database
-            ref = db.reference("produtos")
+        if nome and url_imagem:
             produto = {
                 "nome": nome,
                 "categoria": categoria,
                 "preco": preco,
                 "imagem": url_imagem
             }
-            ref.push(produto)
-            st.success(f"Produto {nome} adicionado com sucesso!")
+            response = requests.post(FIREBASE_URL, data=json.dumps(produto))
+            if response.status_code == 200:
+                st.success(f"Produto {nome} adicionado com sucesso!")
+            else:
+                st.error("Erro ao adicionar produto!")
         else:
-            st.error("Preencha o nome e envie uma imagem")
+            st.error("Preencha nome e URL da imagem")
 
     if st.button("Sair"):
         st.session_state.logged_in = False
         st.success("Você saiu do admin!")
-
