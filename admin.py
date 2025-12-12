@@ -6,7 +6,7 @@ import json
 # Configurações
 # -------------------------------
 FIREBASE_URL = "https://kindnessknots-c6b86-default-rtdb.firebaseio.com/produtos.json"  # Realtime Database
-ADMIN_PASSWORD = "sua_senha_secreta"  # Troque para sua senha
+ADMIN_PASSWORD = "2828"  # Troque para sua senha
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -52,3 +52,4 @@ if st.session_state.logged_in:
     if st.button("Sair"):
         st.session_state.logged_in = False
         st.success("Você saiu do admin!")
+
