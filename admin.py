@@ -5,7 +5,7 @@ import os
 # -------------------------------
 # Configuração da senha do admin
 # -------------------------------
-ADMIN_PASSWORD = "2828"  # Troque para a senha que quiser
+ADMIN_PASSWORD = "sua_senha_secreta"  # Troque para a senha que desejar
 
 # -------------------------------
 # Inicializar estado da sessão
@@ -14,22 +14,29 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 # -------------------------------
+# Pastas e CSV
+# -------------------------------
+PRODUTOS_CSV = "produtos.csv"
+IMAGENS_FOLDER = "imagens"
+if not os.path.exists(IMAGENS_FOLDER):
+    os.mkdir(IMAGENS_FOLDER)
+
+# -------------------------------
 # Funções auxiliares
 # -------------------------------
 def carregar_produtos():
     try:
-        return pd.read_csv("produtos.csv")
+        return pd.read_csv(PRODUTOS_CSV)
     except:
-        return pd.DataFrame(columns=["nome", "categoria", "preco", "imagem"])
+        return pd.DataFrame(columns=["nome","categoria","preco","imagem"])
 
 def salvar_produtos(df):
-    df.to_csv("produtos.csv", index=False)
+    df.to_csv(PRODUTOS_CSV, index=False)
 
 # -------------------------------
 # Login
 # -------------------------------
 st.title("Login Admin - Kindness Knots")
-
 if not st.session_state.logged_in:
     senha_input = st.text_input("Digite a senha do admin", type="password", key="login_senha")
     if st.button("Entrar", key="login_btn"):
@@ -40,16 +47,10 @@ if not st.session_state.logged_in:
             st.error("Senha incorreta. Tente novamente.")
 
 # -------------------------------
-# Conteúdo do painel admin
+# Painel admin
 # -------------------------------
 if st.session_state.logged_in:
     st.title("Painel Admin - Kindness Knots")
-
-    # Criar pasta para imagens se não existir
-    if not os.path.exists("imagens"):
-        os.mkdir("imagens")
-
-    # Carregar produtos
     produtos_df = carregar_produtos()
 
     # -------------------------------
@@ -59,11 +60,11 @@ if st.session_state.logged_in:
     nome = st.text_input("Nome do Produto", key="add_nome")
     categoria = st.selectbox("Categoria", ["Chaveiros", "Broches", "Pelúcias", "Amigurumis"], key="add_categoria")
     preco = st.number_input("Preço (R$)", min_value=0.0, step=0.1, key="add_preco")
-    imagem = st.file_uploader("Imagem do produto", type=["png", "jpg", "jpeg"], key="add_imagem")
+    imagem = st.file_uploader("Imagem do produto", type=["png","jpg","jpeg"], key="add_imagem")
 
     if st.button("Adicionar Produto", key="btn_add"):
         if nome and imagem:
-            imagem_path = f"imagens/{imagem.name}"
+            imagem_path = os.path.join(IMAGENS_FOLDER, imagem.name)
             with open(imagem_path, "wb") as f:
                 f.write(imagem.getbuffer())
             produtos_df = pd.concat([produtos_df, pd.DataFrame([{
@@ -103,7 +104,7 @@ if st.session_state.logged_in:
                 produtos_df.at[index, "categoria"] = categoria_edit
                 produtos_df.at[index, "preco"] = preco_edit
                 if imagem_edit:
-                    imagem_path = f"imagens/{imagem_edit.name}"
+                    imagem_path = os.path.join(IMAGENS_FOLDER, imagem_edit.name)
                     with open(imagem_path, "wb") as f:
                         f.write(imagem_edit.getbuffer())
                     produtos_df.at[index, "imagem"] = imagem_path
@@ -121,4 +122,4 @@ if st.session_state.logged_in:
     # -------------------------------
     if st.button("Sair", key="btn_logout"):
         st.session_state.logged_in = False
-        st.success("Você saiu com sucesso!")
+        st.success("Você saiu do admin!")
