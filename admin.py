@@ -10,8 +10,27 @@ ADMIN_PASSWORD = "2828"  # Troque para a senha que quiser
 # -------------------------------
 # Inicializar estado da sessão
 # -------------------------------
+# Inicializar estado da sessão
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+
+# Login
+if not st.session_state.logged_in:
+    st.title("Login Admin - Kindness Knots")
+    senha_input = st.text_input("Digite a senha do admin", type="password")
+    if st.button("Entrar"):
+        if senha_input == ADMIN_PASSWORD:
+            st.session_state.logged_in = True
+            st.success("Login realizado com sucesso!")
+            # Não usar st.experimental_rerun()
+        else:
+            st.error("Senha incorreta. Tente novamente.")
+
+# Mostrar painel apenas se estiver logado
+if st.session_state.logged_in:
+    st.title("Painel Admin - Kindness Knots")
+    # ... resto do código do admin aqui ...
+
 
 # -------------------------------
 # Função para carregar produtos
@@ -126,4 +145,5 @@ if st.session_state.logged_in:
     if st.button("Sair", key="btn_logout"):
         st.session_state.logged_in = False
         st.experimental_rerun()
+
 
