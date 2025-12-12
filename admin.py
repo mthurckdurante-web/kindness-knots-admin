@@ -5,7 +5,7 @@ import os
 # -------------------------------
 # Configurações do Admin
 # -------------------------------
-ADMIN_PASSWORD = "sua_senha_secreta"
+ADMIN_PASSWORD = "2828"
 
 # Inicializar sessão para login
 if "logged_in" not in st.session_state:
@@ -99,3 +99,4 @@ else:
                 produtos_df = produtos_df.drop(index)
                 produtos_df.to_csv("produtos.csv", index=False)
                 st.success("Produto removido com sucesso!")
+
